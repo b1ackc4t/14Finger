@@ -1,14 +1,8 @@
-from django.utils import timezone
-import os
-
-
-def main():
-    """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', '_14Finger.settings')
-    now = timezone.now()
-
-    print(now)
-
-
+from requests_html import *
 if __name__ == '__main__':
-    main()
+    url = "http://localhost:3000/query"
+    session = HTMLSession()
+    r = session.get(url)
+    html:HTML = r.html
+    html.render()
+    print(html.text)

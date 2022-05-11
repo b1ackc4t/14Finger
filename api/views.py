@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 
 from .models import *
 from core.util.http_scan import finger_scan
+
+import json
 # Create your views here.
 
 
@@ -18,6 +20,12 @@ from core.util.http_scan import finger_scan
 class UserRegisterView(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     def post(self, request, format=None):
+        '''
+        普通用户注册
+        :param request:
+        :param format:
+        :return:
+        '''
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             User.objects.create_user(username=serializer.validated_data['username'],
@@ -64,6 +72,11 @@ class UserLogout(APIView):
     # 关闭csrf
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     def get(self, request):
+        '''
+        退出登录状态
+        :param request:
+        :return:
+        '''
         logout(request)
         return Response("退出成功", status=status.HTTP_200_OK)
 
@@ -72,7 +85,7 @@ class FactoryMultiHandle(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     def get(self, request):
         '''
-        获取所有的厂商信息
+        获取所有通过审核的厂商信息
         :param request:
         :return:
         '''
@@ -85,7 +98,7 @@ class AppMultiHandle(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     def get(self, request):
         '''
-        获取所有应用的信息
+        获取所有通过审核的应用的信息
         :param request:
         :return:
         '''
@@ -99,7 +112,7 @@ class FingerMultiHandle(APIView):
 
     def get(self, request):
         '''
-        分页时间降序获取所有指纹的信息
+        分页时间降序获取所有通过审核的指纹的信息
         :param request:
         :return:
         '''
@@ -117,22 +130,25 @@ class FingerSingleHandle(UserPassesTestMixin, APIView):
         return self.request.user.is_authenticated
 
     def post(self, request):
+        '''
+        用户提交指纹
+        :param request:
+        :return:
+        '''
         serializer = FingerDetailSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
-            print(request.GET.get('app_id', None))
+            data['user'] = request.user
             # 已存在的应用
             if request.GET.get('app_id', None) != None:
                 app = App.objects.get(id=request.GET['app_id'])
                 finger = Finger.objects.create(**data, app=app)
-                return Response(FingerDetailSerializer(finger).data)
             # 已存在的厂商，应用不存在
             elif request.GET.get('factory_id', None) != None:
                 fac = Factory.objects.get(id=request.GET['factory_id'])
                 app = App.objects.create(**data['app'], factory=fac)
                 data['app'] = app
                 finger = Finger.objects.create(**data)
-                return Response(FingerDetailSerializer(finger).data)
             # 厂商和应用都不存在
             else:
                 fac = Factory.objects.create(**data['app']['factory'])
@@ -140,7 +156,7 @@ class FingerSingleHandle(UserPassesTestMixin, APIView):
                 app = App.objects.create(**data['app'])
                 data['app'] = app
                 finger = Finger.objects.create(**data)
-                return Response(FingerDetailSerializer(finger).data)
+            return Response(FingerDetailSerializer(finger).data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,10 +174,14 @@ class FingerSingleQuery(UserPassesTestMixin, APIView):
         :return:
         '''
         url = request.POST['url']   # 获取单个url
+        setting = json.loads(request.POST['setting'])
         fingers_model = Finger.objects.filter(is_right=1)
         fingers = FingerQuerySerializer(fingers_model, many=True)
-        res = finger_scan(url, fingers.data)
-        return Response(res)
+        urls, res = finger_scan(url, fingers.data, setting)
+        if res:
+            return Response({'spider': urls, 'finger': res})
+        else:
+            return Response({'spider': urls, 'finger': []})
 
 
 class FingerMultiAdminHandle(UserPassesTestMixin, APIView):

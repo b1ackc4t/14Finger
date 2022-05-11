@@ -122,4 +122,4 @@ class FingerDetailAdminSerializer(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
         extra_kwargs = {'id': {'read_only': False}}
-        read_only_fields = ('add_time',)
+        read_only_fields = ('add_time', 'user')
