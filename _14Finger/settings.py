@@ -129,6 +129,8 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.exception.custom_handler',
     # 修改默认返回JSON的renderer的类
     'DEFAULT_RENDERER_CLASSES': ('api.renderer.CustomRenderer',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 # Internationalization

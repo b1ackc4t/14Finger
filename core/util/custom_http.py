@@ -52,12 +52,18 @@ def parse_response(url, response):
         "Server": server,
         "size": size,
         "header": response.headers,
-        "locations": locations,
+        "location": locations,
+        "exception": False
     }
     return data
 
 
 def get_webInfo(url):
+    '''
+    获取http详细响应字典
+    :param url:
+    :return:
+    '''
     try:
         with requests.get(url, timeout=10, headers=get_headers(),
                           cookies=get_cookies(), verify=False, allow_redirects=True) as res:
@@ -65,7 +71,30 @@ def get_webInfo(url):
     except Exception as e:
         return {
             "url": url,
-            "status": str(e)
+            "status": str(e),
+            "exception": True
+        }
+
+def get_simple_webInfo(url):
+    '''
+    获取http简单的响应字典
+    :param url:
+    :return:
+    '''
+    try:
+        with requests.get(url, timeout=10, headers=get_headers(),
+                          cookies=get_cookies(), verify=False, allow_redirects=True) as res:
+            return {
+                "url": url,
+                "status": res.status_code,
+                "content": res.content,
+                "exception": False
+            }
+    except Exception as e:
+        return {
+            "url": url,
+            "status": str(e),
+            "exception": True
         }
 
 if __name__ == '__main__':
