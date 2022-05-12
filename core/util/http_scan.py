@@ -1,14 +1,14 @@
 import re
 import hashlib
 import threading
-from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED, as_completed
 from urllib.parse import urlsplit
 from core.util.custom_http import get_webInfo, get_simple_webInfo
 from core.util.spider import *
 
 class ThreadPool(object):
     def __init__(self):
-        self.executor = ThreadPoolExecutor(min(32, os.cpu_count() + 4))
+        self.executor = ThreadPoolExecutor(min(32, os.cpu_count() * 2 + 4))
 
     def submit_task(self, fn, *args, **kwargs):
         """
@@ -22,7 +22,9 @@ class ThreadPool(object):
         return future
 
 thread_pool = ThreadPool()
+batch_thread_pool = ThreadPool()
 lock = threading.Lock()
+batch_lock = threading.Lock()
 
 def regex_compare(regex, value):
     if re.search(regex, value, re.S):
@@ -152,6 +154,15 @@ def finger_scan(targer_url: str, fingers: list, setting: dict):
         count += 1
     return urls_res, res
 
+def finger_scan0(targer_url: str, fingers: list, setting: dict):
+    urls, res = finger_scan(targer_url, fingers, setting)
+    return {
+        'url': targer_url,
+        'result': (
+            urls,
+            res
+        )
+    }
 
 def get_fingers(url, fingers, res, browser):
     data = get_webInfo(url, browser)
@@ -168,6 +179,21 @@ def get_fingers(url, fingers, res, browser):
             lock.release()
 
 
+def finger_batch_scan(target_urls: list, fingers: list, setting: dict):
+    '''
+    多线程批量扫描指纹
+    :param target_urls:
+    :param fingers:
+    :param setting:
+    :return:
+    '''
+    tasks = []
+    res = []
+    for target_url in target_urls:
+        tasks.append(batch_thread_pool.submit_task(finger_scan0, target_url, fingers, setting))
+    for future in as_completed(tasks):
+        res.append(future.result())
+    return res
 
 
 if __name__ == '__main__':

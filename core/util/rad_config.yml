@@ -16,7 +16,7 @@ page_analyze_timeout_second: 300  # 页面分析超时时间，单位秒
 max_interactive: 1000             # 单个页面最大交互次数
 max_interactive_depth: 10         # 页面交互深度限制
 max_page_concurrent: 10           # 最大页面并发（不大于10）
-max_page_visit: 10              # 总共允许访问的页面数量
+max_page_visit: 100              # 总共允许访问的页面数量
 max_page_visit_per_site: 10     # 每个站点最多访问的页面数量
 element_filter_strength: 0        # 过滤同站点相似元素强度，1-7取值，强度逐步增大，为0时不进行跨页面元素过滤
 new_task_filter_config:           # 检查某个链接是否应该被加入爬取队列

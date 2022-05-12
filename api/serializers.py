@@ -32,6 +32,11 @@ class UserSimpleSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email')
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password',)
+
 class FactorySimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factory
@@ -123,3 +128,10 @@ class FingerDetailAdminSerializer(serializers.ModelSerializer):
         depth = 1
         extra_kwargs = {'id': {'read_only': False}}
         read_only_fields = ('add_time', 'user')
+
+
+class BatchQuerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BatchQuery
+        exclude = ('res_json',)
+        depth = 1
