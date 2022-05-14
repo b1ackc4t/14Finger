@@ -1,14 +1,10 @@
-import json
-import random
-import subprocess
 import base64
+import json
+import subprocess
 from bs4 import BeautifulSoup
 import requests
 from core.config.custom_http import *
-from requests_html import HTML
-from requests_html import HTMLSession
-import asyncio
-from multiprocessing import Process, Queue
+
 # 当前路径
 current_path = os.path.dirname(__file__)
 
@@ -69,6 +65,8 @@ def parse_response(url, response, js_exec = False):
     }
     return data
 
+def base64_dict(d: dict):
+    return base64.b64encode(json.dumps(d).encode('utf-8')).decode('utf-8')
 
 def get_webInfo(url, js_exec = False):
     '''
@@ -78,11 +76,11 @@ def get_webInfo(url, js_exec = False):
     '''
     try:
         if not js_exec:
-            with requests.get(url, timeout=10, headers=get_headers(),
+            with requests.get(url, timeout=get_timeout(), headers=get_headers(),
                               cookies=get_cookies(), verify=False, allow_redirects=True) as res:
                 return parse_response(url, res)
         else:
-            cmd = f"python {os.path.join(current_path, 'exec_js_request.py')} {url}"
+            cmd = f"python {os.path.join(current_path, 'exec_js_request.py')} \"{url}\" \"{base64_dict(get_headers())}\" \"{base64_dict(get_cookies())}\" \"{get_timeout()}\""
             p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
             out,err = p.communicate()
             for line in out.splitlines():
@@ -104,7 +102,7 @@ def get_simple_webInfo(url):
     :return:
     '''
     try:
-        with requests.get(url, timeout=10, headers=get_headers(),
+        with requests.get(url, timeout=get_timeout(), headers=get_headers(),
                           cookies=get_cookies(), verify=False, allow_redirects=True) as res:
             return {
                 "url": url,

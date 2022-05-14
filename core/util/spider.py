@@ -3,6 +3,14 @@ import subprocess
 
 current_path = os.path.dirname(__file__)
 
+import platform
+
+rad_file = 'rad.exe'
+if platform.system().lower() == 'windows':
+    rad_file = 'rad.exe'
+elif platform.system().lower() == 'linux':
+    rad_file = 'rad'
+
 def crawl_site(url: str) -> list:
     '''
     调用rad爬取站点
@@ -22,4 +30,4 @@ def crawl_site(url: str) -> list:
 
 
 if __name__ == '__main__':
-    print(crawl_site('https://typemill.net/'))
+    print(len(crawl_site('https://typemill.net/')))

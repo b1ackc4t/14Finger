@@ -13,7 +13,7 @@ navigate_timeout_second: 10       # 访问超时时间，单位秒
 load_timeout_second: 10           # 加载超时时间，单位秒
 retry: 0                          # 页面访问失败后的重试次数
 page_analyze_timeout_second: 300  # 页面分析超时时间，单位秒
-max_interactive: 1000             # 单个页面最大交互次数
+max_interactive: 10             # 单个页面最大交互次数
 max_interactive_depth: 10         # 页面交互深度限制
 max_page_concurrent: 10           # 最大页面并发（不大于10）
 max_page_visit: 100              # 总共允许访问的页面数量

@@ -1,5 +1,5 @@
 import datetime
-
+import os
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -35,7 +35,7 @@ class App(models.Model):
     app_type = models.CharField(max_length=50, null=True)
     app_industry = models.CharField(max_length=100, null=True)
     app_lang = models.CharField(max_length=20, null=True)
-    app_desc = models.CharField(max_length=300, null=True, default=None)
+    app_desc = models.CharField(max_length=300, null=True, default='')
     factory = models.ForeignKey('Factory', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
@@ -59,8 +59,23 @@ class BatchQuery(models.Model):
     name = models.CharField(max_length=200, null=False, unique=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE, null=False)
     res_json = models.JSONField(null=True)
+    all_time = models.IntegerField(null=True)
+    url_num = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name
 
+def get_default_headers():
+    return {'Accept': 'text/html,application/xhtml+xml,'
+                      'application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',}
 
+
+class Config(models.Model):
+    headers = models.JSONField(default=get_default_headers)
+    cookies = models.JSONField(default=dict)
+    timeout = models.IntegerField(default=10)
+    thread_num = models.IntegerField(default=os.cpu_count() * 2 + 4)

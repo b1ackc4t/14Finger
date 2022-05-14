@@ -89,7 +89,7 @@ class FingerDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'app', 'add_time', 'path', 'value', 'method', 'location')
         depth = 1
         extra_kwargs = {
-            'value': {'required': True}
+            'value': {'required': True},
         }
 
 class AppQuerySerializer(serializers.ModelSerializer):
@@ -116,7 +116,7 @@ class FingerSimpleAdminSerializer(serializers.ModelSerializer):
     app = AppSimpleSerializer()
     class Meta:
         model = Finger
-        fields = ('id', 'app', 'add_time', 'is_right')
+        fields = ('id', 'app', 'add_time', 'is_right', 'user')
         depth = 1
 
 
@@ -135,3 +135,9 @@ class BatchQuerySerializer(serializers.ModelSerializer):
         model = BatchQuery
         exclude = ('res_json',)
         depth = 1
+
+
+class ConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Config
+        fields = '__all__'

@@ -1,17 +1,19 @@
 from bs4 import BeautifulSoup
 from requests_html import HTML
 from requests_html import HTMLSession
-from core.config.custom_http import *
+# from core.config.custom_http import *
 
 import sys
 import json
 import base64
 
+def base64_decode(s: str):
+    return json.loads(base64.b64decode(s.encode('utf-8')))
+
 url = sys.argv[1]
-# headers = json.loads(base64.b64decode(sys.argv[2]))
-# cookies = json.loads(base64.b64decode(sys.argv[3]))
-headers = get_headers()
-cookies = get_cookies()
+headers = base64_decode(sys.argv[2])
+cookies = base64_decode(sys.argv[3])
+timeout = int(sys.argv[4])
 
 def parse_response(url, response, js_exec = False):
     '''
@@ -72,10 +74,10 @@ def get_title(html):
 
 
 with HTMLSession() as session:
-    res = session.get(url, timeout=10, headers=headers,
+    res = session.get(url, timeout=timeout, headers=headers,
                       cookies=cookies, verify=False, allow_redirects=True)
     h: HTML = res.html
-    h.render(timeout=20, sleep=1)
+    h.render(timeout=timeout, sleep=1)
     data = parse_response(url, res, True)
     # print(data)
     print(json.dumps(data))

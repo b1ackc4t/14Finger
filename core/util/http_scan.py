@@ -6,9 +6,23 @@ from urllib.parse import urlsplit
 from core.util.custom_http import get_webInfo, get_simple_webInfo
 from core.util.spider import *
 
+
+is_django = os.getenv('DJANGO_SETTINGS_MODULE', None) != None
+if is_django:
+    from api.models import Config
+
 class ThreadPool(object):
     def __init__(self):
-        self.executor = ThreadPoolExecutor(min(32, os.cpu_count() * 2 + 4))
+        if is_django:
+            try:
+                config = Config.objects.get(pk=1)
+            except:
+                config = Config.objects.create(id=1)
+            thread_num = config.thread_num
+        else:
+            thread_num = os.cpu_count() * 2 + 4
+        self.executor = ThreadPoolExecutor(thread_num)
+
 
     def submit_task(self, fn, *args, **kwargs):
         """
@@ -21,13 +35,36 @@ class ThreadPool(object):
         future = self.executor.submit(fn, *args, **kwargs)
         return future
 
+    def close(self):
+        self.executor.shutdown()
+
 thread_pool = ThreadPool()
 batch_thread_pool = ThreadPool()
+finger_thread_pool = ThreadPool()
 lock = threading.Lock()
 batch_lock = threading.Lock()
 
+def recreate_thread_pool():
+    '''
+    重新创建全局线程池
+    :return:
+    '''
+    global thread_pool
+    global batch_thread_pool
+    global finger_thread_pool
+    global lock, batch_lock
+    thread_pool.close()
+    batch_thread_pool.close()
+    finger_thread_pool.close()
+    lock = threading.Lock()
+    batch_lock = threading.Lock()
+    thread_pool = ThreadPool()
+    batch_thread_pool = ThreadPool()
+    finger_thread_pool = ThreadPool()
+
+
 def regex_compare(regex, value):
-    if re.search(regex, value, re.S):
+    if re.search(regex, value, re.S | re.I):
         return True
     return False
 
@@ -51,9 +88,16 @@ def query(method, val, location, data):
         if method(val, data['body']):
             return True
     elif location == 'header':
-        for key, value in data['header'].items():
-            if method(val, key) or method(val, value):
+        if method == regex_compare:
+            header_text = ''
+            for key, value in data['header'].items():
+                header_text += key + ':' + value + '\n'
+            if method(val, header_text):
                 return True
+        else:
+            for key, value in data['header'].items():
+                if method(val, key) or method(val, value):
+                    return True
     elif location == 'url':
         if method(val, data['url']):
             return True
@@ -65,6 +109,7 @@ def query(method, val, location, data):
             return True
     else:
         return False
+    return False
 
 
 def parse_finger(data: dict, method, kwargs):
@@ -86,13 +131,12 @@ def parse_finger(data: dict, method, kwargs):
     elif method == "md5":
         val = kwargs['value'].lower()
         md5_right = hashlib.md5(data['content']).hexdigest()
-        print(md5_right)
         if val.lower() == md5_right:
             return True
     return False
 
 
-def finger_1scan(url: str, finger: dict, data: dict):
+def finger_1scan(url: str, finger: dict, data: dict, browser: bool = False):
     '''
     对单个url用单个指纹扫描
     :param url:
@@ -103,18 +147,79 @@ def finger_1scan(url: str, finger: dict, data: dict):
 
             }
         }
+    :param data: 首页的数据 方便匹配首页指纹而不用再次请求
+    :param browser: 是否模拟浏览器
     :return:
     '''
     method = finger['method']
     if method == 'md5':
-        result=urlsplit(url)
-        par_path = result.path[:result.path.rfind('/')] if result.path.startswith('/') else ''
-        url = f"{result.scheme}://{result.netloc}{par_path}{finger['path']}"
+        if finger.get('path', None):
+            result=urlsplit(url)
+            par_path = result.path[:result.path.rfind('/')] if result.path.startswith('/') else ''
+            url = f"{result.scheme}://{result.netloc}{par_path}{finger['path']}"
         data = get_simple_webInfo(url)
         if data['exception']:
             return False
+    else:
+        if finger.get('path', None):
+            result=urlsplit(url)
+            par_path = result.path[:result.path.rfind('/')] if result.path.startswith('/') else ''
+            url = f"{result.scheme}://{result.netloc}{par_path}{finger['path']}"
+            data = get_webInfo(url, browser)
+            if data['exception']:
+                return False
     return parse_finger(data, method, finger)
 
+
+def finger_1scan0(url: str, finger: dict, data: dict, browser: bool = False):
+    '''
+    对单个url用单个指纹扫描
+    :param url:
+    :param finger:
+        {
+            ...
+            app: {
+
+            }
+        }
+    :param data: 首页的数据 方便匹配首页指纹而不用再次请求
+    :param browser: 是否模拟浏览器
+    :return:
+    '''
+    return finger, finger_1scan(url, finger, data, browser)
+
+def test_finger(test_finger: dict):
+    '''测试指纹是否正确'''
+    if 'checkUrls' in test_finger:
+        urls = test_finger['checkUrls'] # 测试的url列表
+        del test_finger['checkUrls']
+    else:
+        return True
+    tasks = []
+    for url in urls:
+        url = url['value']
+        tasks.append(thread_pool.submit_task(test_url, url, test_finger))
+    for future in as_completed(tasks):
+        if not future.result():
+            return False
+    return True
+
+def test_url(url, test_finger: dict):
+    data = {}
+    if not test_finger.get('path', None):
+        data = get_webInfo(url)
+        if data['exception']:
+            return False
+    if not finger_1scan(url, test_finger, data):
+        data = get_webInfo(url, True)
+        if data['exception']:
+            return False
+        if not finger_1scan(url, test_finger, data, True):
+            return False
+        else:
+            return True
+    else:
+        return True
 
 def finger_scan(targer_url: str, fingers: list, setting: dict):
     '''
@@ -165,11 +270,26 @@ def finger_scan0(targer_url: str, fingers: list, setting: dict):
     }
 
 def get_fingers(url, fingers, res, browser):
-    data = get_webInfo(url, browser)
+    data = get_webInfo(url, browser)    # 先获取首页内容，方便匹配大量的首页指纹
     if data['exception']:
         return res
+    tasks = []
     for finger in fingers:
-        if finger_1scan(url, finger, data):
+        if finger.get('path', None):
+            tasks.append(finger_thread_pool.submit_task(finger_1scan0, url, finger, data, browser))
+        else:
+            if finger_1scan(url, finger, data, browser):
+                lock.acquire()
+                if finger['app']['name'] in res:
+                    res[finger['app']['name']]['count'] += 1
+                else:
+                    res[finger['app']['name']] = finger['app']
+                    res[finger['app']['name']]['count'] = 1
+                lock.release()
+    for future in as_completed(tasks):
+        result = future.result()
+        finger = result[0]
+        if result[1]:
             lock.acquire()
             if finger['app']['name'] in res:
                 res[finger['app']['name']]['count'] += 1
@@ -177,6 +297,7 @@ def get_fingers(url, fingers, res, browser):
                 res[finger['app']['name']] = finger['app']
                 res[finger['app']['name']]['count'] = 1
             lock.release()
+
 
 
 def finger_batch_scan(target_urls: list, fingers: list, setting: dict):
