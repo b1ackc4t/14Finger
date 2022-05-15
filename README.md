@@ -128,5 +128,5 @@ python manage.py runserver
 
 [https://github.com/chaitin/rad](https://github.com/chaitin/rad)
 
-[https://github.com/EASY233/Finger](
+[https://github.com/EASY233/Finger](https://github.com/EASY233/Finger)
 
