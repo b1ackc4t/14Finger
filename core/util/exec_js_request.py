@@ -77,7 +77,7 @@ with HTMLSession() as session:
     res = session.get(url, timeout=timeout, headers=headers,
                       cookies=cookies, verify=False, allow_redirects=True)
     h: HTML = res.html
-    h.render(timeout=timeout, sleep=1)
+    h.render(timeout=timeout * 5, sleep=1)
     data = parse_response(url, res, True)
     # print(data)
     print(json.dumps(data))

@@ -190,7 +190,7 @@ class AppMultiHandle(APIView):
         :return:
         '''
         apps = App.objects.filter(is_right=True)
-        serializers = AppSimpleSerializer(apps, many=True)
+        serializers = AppEasySerializer(apps, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 

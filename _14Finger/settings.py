@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^s%c+6#f%30@po7*ui0^ht(ei3rlz0v$74+_4x09vk21!cdz3k'
+SECRET_KEY = 'django-insecure-^s%c+6#f%30@po7*ui0^ht(ei3jla0v$74+_4x09vk21!cdz3k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -56,8 +56,9 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
+# 解决前后端分离cookie存储问题
 SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = "None"  # response header set-cookie:samesite=lax  Default: 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'  # response header set-cookie:samesite=lax  Default: 'Lax'
 CSRF_COOKIE_SAMESITE = None
 
 ROOT_URLCONF = '_14Finger.urls'

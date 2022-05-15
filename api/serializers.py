@@ -53,6 +53,7 @@ class FactoryDetailSerializer(serializers.ModelSerializer):
         # read_only_fields = ('name',)
 
 
+
 class AppSimpleSerializer(serializers.ModelSerializer):
     factory = FactorySimpleSerializer()
     class Meta:
@@ -60,6 +61,10 @@ class AppSimpleSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'app_type', 'app_desc', 'factory')
         depth = 1
 
+class AppEasySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = App
+        fields = ('id', 'name')
 
 class AppDetailSerializer(serializers.ModelSerializer):
     factory = FactoryDetailSerializer(required=False)

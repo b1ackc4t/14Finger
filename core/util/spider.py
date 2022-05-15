@@ -17,7 +17,7 @@ def crawl_site(url: str) -> list:
     :param url: 爬取到的url列表
     :return:
     '''
-    cmd = f"{os.path.join(current_path, 'rad.exe')} -c {os.path.join(current_path, 'rad_config.yml')} -t {url} "
+    cmd = f"{os.path.join(current_path, rad_file)} -c {os.path.join(current_path, 'rad_config.yml')} -t {url} --no-banner"
     p = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE)
     out,err = p.communicate()
     res = []

@@ -4,6 +4,8 @@ import subprocess
 from bs4 import BeautifulSoup
 import requests
 from core.config.custom_http import *
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # 当前路径
 current_path = os.path.dirname(__file__)
