@@ -13,6 +13,8 @@
 
 # 平台部署
 
+**如要部署到公网请修改django SECRET_KEY，在settings.py里，否则加密密钥泄漏会导致安全隐患**
+
 ## Docker一键部署
 
 下载release里已经打包好的docker包，解压后在文件夹里执行：
@@ -116,5 +118,15 @@ python manage.py runserver
 
 * 对平台扫描的一些基础信息进行配置
 
+# 学习与参考
 
+感谢前辈们优秀的项目，给予了很大的帮助
+
+[https://github.com/TideSec/TideFinger](https://github.com/TideSec/TideFinger)
+
+[https://github.com/Lucifer1993/cmsprint](https://github.com/Lucifer1993/cmsprint)
+
+[https://github.com/chaitin/rad](https://github.com/chaitin/rad)
+
+[https://github.com/EASY233/Finger](
 
