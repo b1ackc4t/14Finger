@@ -15,6 +15,8 @@
 
 **如要部署到公网请修改django SECRET_KEY，在settings.py里，否则加密密钥泄漏会导致安全隐患**
 
+<font color="red">**初始管理员用户名/密码：admin/admin**</font>
+
 ## Docker一键部署
 
 下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后执行以下命令：
