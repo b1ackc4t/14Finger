@@ -6429,7 +6429,7 @@ CREATE TABLE `api_config`  (
 -- ----------------------------
 -- Records of api_config
 -- ----------------------------
-INSERT INTO `api_config` VALUES (1, '{\"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Connection\": \"keep-alive\", \"Cache-Control\": \"max-age=0\", \"Accept-Language\": \"en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7\", \"Upgrade-Insecure-Requests\": \"1\"}', '{}', 36, 1);
+INSERT INTO `api_config` VALUES (1, '{\"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\", \"Connection\": \"keep-alive\", \"Cache-Control\": \"max-age=0\", \"Accept-Language\": \"en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7\", \"Upgrade-Insecure-Requests\": \"1\"}', '{}', 36, 10);
 
 -- ----------------------------
 -- Table structure for api_factory
