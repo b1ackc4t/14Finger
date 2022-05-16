@@ -17,9 +17,11 @@
 
 ## Docker一键部署
 
-下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后在文件夹里执行：
+下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后执行以下命令：
 
 ``````bash
+chmod -R 755 ./14Finger-docker
+cd ./14Finger-docker
 docker-compose up -d
 ``````
 
