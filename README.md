@@ -17,7 +17,7 @@
 
 ## Docker一键部署
 
-下载release里已经打包好的docker包，解压后在文件夹里执行：
+下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后在文件夹里执行：
 
 ``````bash
 docker-compose up -d
@@ -46,13 +46,13 @@ DATABASES = {
 
 导入14finger.sql文件后，分别启动前后端即可
 
-前端 https://github.com/b1ackc4t/14Finger-client
+前端 [https://github.com/b1ackc4t/14Finger-client](https://github.com/b1ackc4t/14Finger-client)
 
 ```bash
 npm run dev
 ```
 
-后端 https://github.com/b1ackc4t/14Finger
+后端 [https://github.com/b1ackc4t/14Finger](https://github.com/b1ackc4t/14Finger)
 
 ```bash
 pip install -r requirements.txt
