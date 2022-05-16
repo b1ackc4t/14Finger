@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import FileResponse
 from django.db.models import Q
+from django.db import connection
 
 from .models import *
 from core.util.http_scan import finger_scan, finger_batch_scan, recreate_thread_pool, test_finger
@@ -465,12 +466,14 @@ def background_scan(urls, setting, id):
     if setting.get('only_home', True):
         fingers_model = fingers_model.filter(Q(path=None)|Q(path=''))
     fingers = FingerQuerySerializer(fingers_model, many=True)
+    connection.close()
     start = timezone.now()
     res = finger_batch_scan(urls, fingers.data, setting)
     end = timezone.now()
     consume = (end - start).seconds
     bq = BatchQuery(id=id, status="success", res_json=res, all_time=consume)
     bq.save(update_fields=['status', 'res_json', 'all_time'])
+    connection.close()
 
 
 class FingerBatchQuery(UserPassesTestMixin, APIView):
