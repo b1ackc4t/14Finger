@@ -17,6 +17,8 @@
 
 <font color="red">**初始管理员用户名/密码：admin/admin**</font>
 
+**演示视频：[https://www.bilibili.com/video/BV1br4y1b7fF](https://www.bilibili.com/video/BV1br4y1b7fF)**
+
 ## Docker一键部署
 
 下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后执行以下命令：
