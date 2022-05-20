@@ -67,6 +67,7 @@ CELERY_RESULT_BACKEND = 'redis://root:123456@127.0.0.1:6379/2'
 前端 [https://github.com/b1ackc4t/14Finger-client](https://github.com/b1ackc4t/14Finger-client)
 
 ```bash
+npm install
 npm run dev
 ```
 
