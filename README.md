@@ -11,11 +11,12 @@
 4. **人性化的指纹提交**功能，指纹种类和信息划分精细，可供用户打造出自己的无敌指纹库
 5. **批量爬虫**、**批量指纹**，均在后台处理，无需前台等待
 
+
 # 平台部署
 
 **如要部署到公网请修改django SECRET_KEY，在settings.py里，否则加密密钥泄漏会导致安全隐患**
 
-<font color="red">**初始管理员用户名/密码：admin/admin**</font>
+<font color="red">**初始管理员用户名/密码：admin/admin，b1ackc4t/123456**</font>
 
 **演示视频：[https://www.bilibili.com/video/BV1br4y1b7fF](https://www.bilibili.com/video/BV1br4y1b7fF)**
 
@@ -35,6 +36,14 @@ docker-compose up -d
 
 ## 手动启动
 
+### 依赖环境
+
+* mysql
+* redis
+* python
+
+最好在**linux**下运行（因为使用了celery，celery对windows支持较差，不稳定）
+
 修改_14Finger/setting.py的数据库配置为自己的数据库
 
 ```python
@@ -48,9 +57,12 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+# celery配置
+CELERY_BROKER_URL = 'redis://root:123456@127.0.0.1:6379/1'
+CELERY_RESULT_BACKEND = 'redis://root:123456@127.0.0.1:6379/2'
 ```
 
-导入14finger.sql文件后，分别启动前后端即可
+导入14finger.sql文件后，分别启动前后端和celery即可
 
 前端 [https://github.com/b1ackc4t/14Finger-client](https://github.com/b1ackc4t/14Finger-client)
 
@@ -63,6 +75,14 @@ npm run dev
 ```bash
 pip install -r requirements.txt
 python manage.py runserver
+```
+
+celery（在后端根目录执行）
+```bash
+# linux下（推荐）
+celery -A core.celery_pak.main worker -l info
+# windows下（需安装eventlet）
+celery -A core.celery_pak.main worker -l info -P eventlet
 ```
 
 然后访问[http://127.0.0.1:3000/]()，修改ip的方法同docker部署一样

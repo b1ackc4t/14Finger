@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,8 +94,19 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',
+        'OPTIONS': {
+            "init_command": "SET GLOBAL max_connections = 1000", #<-- The fix
+        }
     }
 }
+
+# celery配置
+CELERY_BROKER_URL = 'redis://root:123456@127.0.0.1:6379/1'
+CELERY_RESULT_BACKEND = 'redis://root:123456@127.0.0.1:6379/2'
+# Worker并发数量，一般默认CPU核数，可以不设置
+CELERY_WORKER_CONCURRENCY = 10 if os.cpu_count() * 2 < 10 else os.cpu_count() * 2
+# CELERY_WORKER_CONCURRENCY = 2
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 80  # 一个worker运行80次后销毁重建
 
 
 # Password validation

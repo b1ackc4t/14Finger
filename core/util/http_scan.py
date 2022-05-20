@@ -1,6 +1,7 @@
 import re
 import hashlib
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED, as_completed
 from urllib.parse import urlsplit
 from core.util.custom_http import get_webInfo, get_simple_webInfo
@@ -10,10 +11,21 @@ from core.util.spider import *
 is_django = os.getenv('DJANGO_SETTINGS_MODULE', None) != None
 if is_django:
     from api.models import Config
+    from django.db import connections
 
 class ThreadPool(object):
     def __init__(self):
         if is_django:
+            db_ready = False
+            re_count = 10
+            while not db_ready and re_count > 0:
+                try:
+                    cursor = connections['default'].cursor()
+                    db_ready = True
+                except:
+                    print("数据库连接失败，可能正在创建中，等待5秒后重试")
+                    time.sleep(5)
+                    re_count -= 1
             try:
                 config = Config.objects.get(pk=1)
             except:

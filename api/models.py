@@ -61,6 +61,7 @@ class BatchQuery(models.Model):
     res_json = models.JSONField(null=True)
     all_time = models.IntegerField(null=True)
     url_num = models.IntegerField(null=True)
+    celery_id = models.CharField(max_length=100, null=False, default="")
 
     def __str__(self):
         return self.name

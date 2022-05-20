@@ -1,5 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
-
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,18 +10,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import FileResponse
 from django.db.models import Q
-from django.db import connection
-
+from celery.app.control import Control
+from celery.result import AsyncResult
 from .models import *
-from core.util.http_scan import finger_scan, finger_batch_scan, recreate_thread_pool, test_finger
+from core.util.http_scan import finger_scan, recreate_thread_pool, test_finger
 import _14Finger.settings as setting
+from core.celery_pak.batch_query.tasks import *
+from core.celery_pak.main import app
 
 import json
-import threading
-import time
 import io
-# Create your views here.
-
 
 
 class UserRegisterView(APIView):
@@ -461,21 +457,6 @@ class FingerSingleAdminHandle(UserPassesTestMixin, APIView):
         return Response("修改成功")
 
 
-def background_scan(urls, setting, id):
-    fingers_model = Finger.objects.filter(is_right=1)
-    if setting.get('only_home', True):
-        fingers_model = fingers_model.filter(Q(path=None)|Q(path=''))
-    fingers = FingerQuerySerializer(fingers_model, many=True)
-    connection.close()
-    start = timezone.now()
-    res = finger_batch_scan(urls, fingers.data, setting)
-    end = timezone.now()
-    consume = (end - start).seconds
-    bq = BatchQuery(id=id, status="success", res_json=res, all_time=consume)
-    bq.save(update_fields=['status', 'res_json', 'all_time'])
-    connection.close()
-
-
 class FingerBatchQuery(UserPassesTestMixin, APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
@@ -493,8 +474,17 @@ class FingerBatchQuery(UserPassesTestMixin, APIView):
         else:
             id = self.request.user.id
             batch_querys = BatchQuery.objects.filter(user_id=id).order_by('-add_time')
-        serializers = BatchQuerySerializer(batch_querys, many=True)
-        return Response(serializers.data)
+
+        page = PageNumberPagination()
+        page_data = page.paginate_queryset(queryset=batch_querys, request=request, view=self)
+        serializers = serializers = BatchQuerySerializer(page_data, many=True)
+        resp = serializers.data
+        for res in resp:
+            if res['status'] != 'success':
+                async_result = AsyncResult(id=res['celery_id'], app=app)
+                if async_result.failed():
+                    res['status'] = 'fail'
+        return page.get_paginated_response(serializers.data)
 
     def post(self, request):
         '''
@@ -507,18 +497,15 @@ class FingerBatchQuery(UserPassesTestMixin, APIView):
         setting = json.loads(request.POST['setting'])
 
         date = timezone.now()
-        batch_query_info = BatchQuery(name=f"scan-{date.year}-{date.month}-{date.day}-{date.hour}-{date.minute}-{date.second}",
-                                      user=request.user, url_num=len(urls_l))
-        batch_query_info.save()
-
-        # t = threading.Thread(target=background_scan, args=(urls_l, fingers.data, setting, batch_query_info.id), kwargs={})
-        # t.setDaemon(True)
-        # t.start()
-
-        pool = ThreadPoolExecutor(1)
-        pool.submit(background_scan, urls_l, setting, batch_query_info.id)
-
-
+        try:
+            batch_query_info = BatchQuery(name=f"scan-{date.year}-{date.month}-{date.day}-{date.hour}-{date.minute}-{date.second}-{str(date.microsecond)[-2:]}",
+                                          user=request.user, url_num=len(urls_l))
+            batch_query_info.save()
+        except:
+            return Response("客官请慢一点，服务器正忙")
+        result = batch_query_bak.delay(urls_l, setting, batch_query_info.id)
+        batch_update = BatchQuery(id=batch_query_info.id, celery_id=result.id)
+        batch_update.save(force_update=True, update_fields=['celery_id'])
         return Response("任务添加成功")
 
 
@@ -553,6 +540,8 @@ class FingerBatchAction(UserPassesTestMixin, APIView):
         '''
         id = request.GET['id']
         batch_query = BatchQuery(id=id)
+        ctrl = Control(app)
+        r = ctrl.terminate(batch_query.celery_id)
         batch_query.delete()
         return Response("删除成功")
 

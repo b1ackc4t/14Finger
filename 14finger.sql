@@ -11,7 +11,7 @@
  Target Server Version : 80021
  File Encoding         : 65001
 
- Date: 15/05/2022 20:44:01
+ Date: 19/05/2022 22:21:04
 */
 
 SET NAMES utf8mb4;
@@ -6407,11 +6407,12 @@ CREATE TABLE `api_batchquery`  (
   `res_json` json NULL,
   `all_time` int(0) NULL DEFAULT NULL,
   `url_num` int(0) NULL DEFAULT NULL,
+  `celery_id` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `name`(`name`) USING BTREE,
   INDEX `api_batchquery_user_id_fbd1660d_fk_api_user_id`(`user_id`) USING BTREE,
   CONSTRAINT `api_batchquery_user_id_fbd1660d_fk_api_user_id` FOREIGN KEY (`user_id`) REFERENCES `api_user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for api_config
@@ -20881,7 +20882,7 @@ CREATE TABLE `api_user`  (
 -- Records of api_user
 -- ----------------------------
 INSERT INTO `api_user` VALUES (8, '2022-05-14 16:45:33.341946', '1232241@163.com', '', 1, 0, 0, NULL, '', 'pbkdf2_sha256$320000$duYvX9uzlo6RoyqkRzB0hx$p05Ka7v2NWP3P+IUbLhfG/ijPi5mXJWJrzWq1xB4e6Q=', 'b1ackc4t', 'admin');
-INSERT INTO `api_user` VALUES (9, '2022-05-10 15:21:18.332770', '1844305147@qq.com', '', 1, 0, 0, '2022-05-15 20:38:35.329651', '', 'pbkdf2_sha256$320000$2pmj546Ct5q5Ov0elUsDQ6$SkdAY2K+xsm6J1/V6Pwc1DUdywa+Txctl7jCmIDnyZ8=', 'admin', 'admin');
+INSERT INTO `api_user` VALUES (9, '2022-05-10 15:21:18.332770', '1844305147@qq.com', '', 1, 0, 0, '2022-05-15 21:02:38.778373', '', 'pbkdf2_sha256$320000$2pmj546Ct5q5Ov0elUsDQ6$SkdAY2K+xsm6J1/V6Pwc1DUdywa+Txctl7jCmIDnyZ8=', 'admin', 'admin');
 
 -- ----------------------------
 -- Table structure for api_user_groups
@@ -21182,6 +21183,8 @@ INSERT INTO `django_migrations` VALUES (41, 'api', '0022_config_timeout', '2022-
 INSERT INTO `django_migrations` VALUES (42, 'api', '0023_alter_app_app_desc_alter_config_headers', '2022-05-13 16:29:03.338074');
 INSERT INTO `django_migrations` VALUES (43, 'api', '0024_batchquery_all_time', '2022-05-14 18:24:26.851392');
 INSERT INTO `django_migrations` VALUES (44, 'api', '0025_batchquery_url_num', '2022-05-14 18:39:54.074201');
+INSERT INTO `django_migrations` VALUES (45, 'api', '0002_alter_batchquery_celery_id', '2022-05-19 17:05:45.402749');
+INSERT INTO `django_migrations` VALUES (46, 'api', '0002_batchquery_celery_id', '2022-05-19 17:11:33.642180');
 
 -- ----------------------------
 -- Table structure for django_session
@@ -21213,6 +21216,7 @@ INSERT INTO `django_session` VALUES ('pojmco4gynyxb2s40x78isphe5ximra6', '.eJxVi
 INSERT INTO `django_session` VALUES ('reje5s302dxk2yavlg57nfazst9fgxwf', '.eJxVi0EKAjEQBP8yZ1mSyTohHv2D59DJZMgiiLjuSfy7ETys9KmrqBdlbM-et7U98qJ0oiMd9qygXtvtK3Bfpj2aLuOcf_qv6Vj7CFqEgFnGODDMEJKH05icWtQgkmoVaInBOVYUm73DXAJXrWKe3h_OJTNi:1nnKCA:Zlo1N01y1Mj635y2ZXKXonPnX70RNyKNzWnEQ17Pemg', '2022-05-21 21:10:02.362399');
 INSERT INTO `django_session` VALUES ('rtcbfellmm7iw3dcrzzzzasiql365xuq', '.eJxVizEOwjAMAP-SGVWxqe2EkT8wR66dKhUSQpROFX9vkRjKeHe6NRRd3q0sc32VycMl5HA6ukHtXh_foM-pO6rutsP1l_-epnPbB7d8ZiGIycRR2bKMgJQQpBJZZTPPDJEFKHEEGMkiMvXGqIND-GyvcDIK:1np78j:tM7X2X2pIqDFoXJztvWPoGVN3n8-qL8cGLGWhX5YfdE', '2022-05-26 19:37:53.313313');
 INSERT INTO `django_session` VALUES ('rv2kd2otiwdy2q1fuq6xy4oxlt11pg2z', '.eJxVi0EKAjEQBP8yZ1mSyTohHv2D59DJZMgiiLjuSfy7ETys9KmrqBdlbM-et7U98qJ0oiMd9qygXtvtK3Bfpj2aLuOcf_qv6Vj7CFqEgFnGODDMEJKH05icWtQgkmoVaInBOVYUm73DXAJXrWKe3h_OJTNi:1nnJcl:Mk5wnydV9JUxQLtwZC9nnhtBnl0spSSQKc2q0ue3XoI', '2022-05-21 20:33:27.549378');
+INSERT INTO `django_session` VALUES ('v6ob9r3grc05n36b5zdfdkf2l7990ype', '.eJxVjEsKwzAMBe-idQmWP3LcZe_QtZEsG4dCKU2zCr17EugiXb4Z5q2Qefn0vMz1nSeFKyS4nJlwedTnIfg1DWc03Pdx--m_pvPcj6eqxZAXZNTIbdQRPTWpSoIWKSZrjXUoIRSTQkuOMVLARkbE-eLhuwHQmTKK:1nqDtO:JSl9bIAvRxShfcoKgwpTrNG4Ss_bLAuYoKcFfWV0tRE', '2022-05-29 21:02:38.831427');
 INSERT INTO `django_session` VALUES ('vus6ljzkdnpkyjnb1fozbn9pchlfi7y4', '.eJxVjDEOwjAMRe-SGVWxnTQJI3dgjlzHViokhCidKu4OlRjK-N_T-5urvL56XRd91rm5s8vudGQTy03vu-DHPBzRcP2Oy0__NZ2Xvj-1mNRozJYhKiAKkFopAThpIs--mAclydbGKWRBJJIQ0DBG4OLeH8FkMnA:1nnzU7:bGyTibwyo4rNedRu6JO4UVO80QHsw-602FFOFuqQTbI', '2022-05-23 17:15:19.214985');
 INSERT INTO `django_session` VALUES ('w2llkyf8oki8e8nqm0ejonfssc5p85lh', '.eJxVizEOwjAMAP-SGVWxqe2EkT8wR66dKhUSQpROFX9vkRjKeHe6NRRd3q0sc32VycMl5HA6ukHtXh_foM-pO6rutsP1l_-epnPbB7d8ZiGIycRR2bKMgJQQpBJZZTPPDJEFKHEEGMkiMvXGqIND-GyvcDIK:1nojHp:mPV6IHWGzZe_bShOm82FtXyn3lTRzZc5vHsf1dBANtE', '2022-05-25 18:09:41.486349');
 INSERT INTO `django_session` VALUES ('zpf1emfygu2mlxm3gz81w1kaf9egfz9o', '.eJxVi0EKAjEQBP8yZ1mSyTohHv2D59DJZMgiiLjuSfy7ETys9KmrqBdlbM-et7U98qJ0oiMd9qygXtvtK3Bfpj2aLuOcf_qv6Vj7CFqEgFnGODDMEJKH05icWtQgkmoVaInBOVYUm73DXAJXrWKe3h_OJTNi:1nnK2B:aLm896ZZAgtDIuugQL628gq7wnFdtiGpGlABBRWjElg', '2022-05-21 20:59:43.656792');
