@@ -32,7 +32,7 @@ class ThreadPool(object):
                 config = Config.objects.create(id=1)
             thread_num = config.thread_num
         else:
-            thread_num = os.cpu_count() * 2 + 4
+            thread_num = os.cpu_count() if os.cpu_count() < 10 else os.cpu_count() * 2 + 4
         self.executor = ThreadPoolExecutor(thread_num)
 
 

@@ -11,7 +11,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import FileResponse
 from django.db.models import Q
 from celery.app.control import Control
-from celery.result import AsyncResult
 from .models import *
 from core.util.http_scan import finger_scan, recreate_thread_pool, test_finger
 import _14Finger.settings as setting
@@ -477,13 +476,7 @@ class FingerBatchQuery(UserPassesTestMixin, APIView):
 
         page = PageNumberPagination()
         page_data = page.paginate_queryset(queryset=batch_querys, request=request, view=self)
-        serializers = serializers = BatchQuerySerializer(page_data, many=True)
-        resp = serializers.data
-        for res in resp:
-            if res['status'] != 'success':
-                async_result = AsyncResult(id=res['celery_id'], app=app)
-                if async_result.failed():
-                    res['status'] = 'fail'
+        serializers = BatchQuerySerializer(page_data, many=True)
         return page.get_paginated_response(serializers.data)
 
     def post(self, request):

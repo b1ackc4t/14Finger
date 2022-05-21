@@ -2,13 +2,11 @@ import datetime
 import os
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
 from django.utils import timezone
 # Create your models here.
 class User(AbstractUser):
     email = models.CharField(max_length=50, null=True, blank=True, unique=True)
     role = models.CharField(max_length=50, default="user")
-
 
     def __str__(self):
         return self.username
@@ -79,4 +77,4 @@ class Config(models.Model):
     headers = models.JSONField(default=get_default_headers)
     cookies = models.JSONField(default=dict)
     timeout = models.IntegerField(default=10)
-    thread_num = models.IntegerField(default=os.cpu_count() * 2 + 4)
+    thread_num = models.IntegerField(default=os.cpu_count() if os.cpu_count() < 10 else os.cpu_count() * 2 + 4)

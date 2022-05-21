@@ -102,9 +102,9 @@ DATABASES = {
 
 # celery配置
 CELERY_BROKER_URL = 'redis://root:123456@127.0.0.1:6379/1'
-CELERY_RESULT_BACKEND = 'redis://root:123456@127.0.0.1:6379/2'
+# CELERY_RESULT_BACKEND = 'redis://root:123456@127.0.0.1:6379/2'
 # Worker并发数量，一般默认CPU核数，可以不设置
-CELERY_WORKER_CONCURRENCY = 10 if os.cpu_count() * 2 < 10 else os.cpu_count() * 2
+CELERY_WORKER_CONCURRENCY = os.cpu_count() if os.cpu_count() < 10 else os.cpu_count() * 2
 # CELERY_WORKER_CONCURRENCY = 2
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 80  # 一个worker运行80次后销毁重建
 
