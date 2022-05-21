@@ -178,7 +178,7 @@ def finger_1scan(url: str, finger: dict, data: dict, browser: bool = False):
             par_path = result.path[:result.path.rfind('/')] if result.path.startswith('/') else ''
             url = f"{result.scheme}://{result.netloc}{par_path}{finger['path']}"
             data = get_webInfo(url, browser)
-            if data['exception']:
+            if data['exception'] or data['status'] == 404:
                 return False
     return parse_finger(data, method, finger)
 

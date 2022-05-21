@@ -65,6 +65,7 @@ class UserLogin(APIView):
         password = request.data.get('password', "")
         email = request.data.get('email', "")
         user = authenticate(request, username=username, password=password, email=email)
+        time.sleep(70)
         if user:
             login(request, user)
             return Response("登录成功", status=status.HTTP_200_OK)

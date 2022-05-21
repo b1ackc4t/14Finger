@@ -121,7 +121,7 @@ def get_simple_webInfo(url):
 
 
 if __name__ == '__main__':
-    url = "http://localhost:3000/"
+    url = "https://www.baidu.com/admin/SouthidcEditor/Include/Editor.js"
 
 
     d = get_webInfo(url, True)
