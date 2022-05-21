@@ -24,6 +24,13 @@
 
 下载 [https://github.com/b1ackc4t/14Finger/releases](https://github.com/b1ackc4t/14Finger/releases) 里已经打包好的docker包，解压后执行以下命令：
 
+对于**低配置主机**，比如只有一两个核心的服务器，可以修改```/14Finger-docker/main/14Finger/uwsgi.ini```的进程数和线程数，避免过度使用资源导致卡死
+
+```properties
+ processes=10
+ threads=300
+```
+
 ``````bash
 chmod -R 755 ./14Finger-docker  # 赋予足够权限
 cd ./14Finger-docker
@@ -32,7 +39,7 @@ docker-compose up -d
 
 然后访问 **[http://127.0.0.1:7990]()** 即可，使用其他ip无法访问后端服务。
 
-如要修改访问ip，请修改/14Finger-docker/nginx/html/config.json的BASE_URL_PROD，然后重启服务即可
+如要修改访问ip，请修改```/14Finger-docker/nginx/html/config.json```的```BASE_URL_PROD```，然后重启服务即可
 
 ## 手动启动
 
