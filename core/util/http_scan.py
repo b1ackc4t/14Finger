@@ -17,13 +17,13 @@ class ThreadPool(object):
     def __init__(self):
         if is_django:
             db_ready = False
-            re_count = 10
+            re_count = 500
             while not db_ready and re_count > 0:
                 try:
                     cursor = connections['default'].cursor()
                     db_ready = True
                 except:
-                    print("数据库连接失败，可能正在创建中，等待5秒后重试")
+                    print("数据库连接失败，sql文件较大，可能正在创建中（与cpu速度有关），等待5秒后重试")
                     time.sleep(5)
                     re_count -= 1
             try:

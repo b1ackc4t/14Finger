@@ -31,6 +31,8 @@
  threads=300
 ```
 
+**mac和windows下请将```/14Finger-docker/mysql/data```文件夹清空，因为提前写入的data只能适配linux。**
+
 ``````bash
 chmod -R 755 ./14Finger-docker  # 赋予足够权限
 cd ./14Finger-docker
