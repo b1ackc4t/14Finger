@@ -331,7 +331,9 @@ def finger_batch_scan(target_urls: list, fingers: list, setting: dict):
 
 if __name__ == '__main__':
     setting = {
-        'browser': False
+        'browser': False,
+        'spider': False,
+        'only_spider': False
     }
     url = "http://localhost:3000/"
     fingers = [
