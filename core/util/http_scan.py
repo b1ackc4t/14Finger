@@ -35,7 +35,6 @@ class ThreadPool(object):
             thread_num = os.cpu_count() if os.cpu_count() < 10 else os.cpu_count() * 2 + 4
         self.executor = ThreadPoolExecutor(thread_num)
 
-
     def submit_task(self, fn, *args, **kwargs):
         """
         异步执行任务
